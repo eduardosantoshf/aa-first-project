@@ -1,4 +1,5 @@
 import random as rand
+from turtle import position
 from typing import Tuple
 import networkx as nx
 import matplotlib as plot
@@ -42,3 +43,70 @@ class SearchGraph:
                 self.add_edge(self.vertices[v1], self.vertices[v2])
         
         return self
+
+    def draw_graph(self, ax = None):
+        graph = nx.Graph()
+
+        for vertices, neighbours in self.edges.items():
+            for neighbour in neighbours:
+                graph.add_edge(vertices, neighbour)
+        
+        positions = {x: x for x in graph.nodes}
+
+        low, *_, high = sorted(self.vertices.values())
+        norm = plot.colors.Normalize(vmin=low, vmax=high, clip=True)
+        mapper = plot.cm.ScalarMappable(norm=norm, cmap=plot.cm.coolwarm)
+        colors = [mapper.to_rgba(i) for i in self.vertices.values()]
+
+        sol_vertices = {}
+        sol_colors = []
+        rem_vertices = {}
+        rem_colors = []
+
+        for i, (v, w) in enumerate(self.vertices.items()):
+            if v in self.solution[1][0]:
+                sol_vertices[v] = w
+                sol_colors.append(colors[i])
+
+            else:
+                rem_vertices[v] = w
+                rem_colors.append(colors[i])
+        
+        nx.draw_networkx_edges(
+            graph,
+            pos=positions,
+            nodelist=self.vertices,
+            edge_color='gray',
+            node_size=500,
+            width=2,
+            ax=ax)
+
+        nx.draw_networkx_nodes(
+            graph,
+            pos=positions,
+            labels=sol_vertices,
+            nodelist=sol_vertices,
+            node_size=800,
+            node_color=sol_colors,
+            cmap=plot.cm.summer,
+            ax=ax)
+
+        rem_nodes = nx.draw_networkx_nodes(
+            graph,
+            pos=positions,
+            labels=rem_vertices,
+            nodelist=rem_vertices,
+            node_size=500,
+            node_color='white',
+            cmap=plot.cm.summer,
+            ax=ax)
+        rem_nodes.set_edgecolors(rem_colors)
+        rem_nodes.set_linewidth(2)
+
+        nx.draw_networkx_labels(
+            graph,
+            pos=positions,
+            labels=self.vertices,
+            font_weight='bold',
+            font_color='black',
+            with_labels=True)
