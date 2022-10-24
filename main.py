@@ -62,4 +62,8 @@ if __name__ == '__main__':
 
     g.draw_graph()
 
+    plot.axis('on')
+    plot.xlim(0, 10)
+    plot.ylim(0, 10)
+    plot.tick_params(left=True, bottom=True,             labelleft=True, labelbottom=True)
     plot.show()

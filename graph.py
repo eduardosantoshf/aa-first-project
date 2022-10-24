@@ -27,6 +27,41 @@ class SearchGraph:
 
         return self
 
+    def read_graph(self, filename: str):
+        self.vertices.clear()
+        self.edges.clear()
+
+        try:
+            file = open(filename, "r")
+        except FileNotFoundError:
+            print(f"Error! File not found!")
+            exit(1)
+
+        l = 0
+        while file:
+            line = file.readline()
+            l += 1
+            #if not line:
+            #    continue
+
+            #vertices_number = len(line.split(" "))
+            vertices_number = int(line)
+            print(vertices_number)
+
+            vertices = []
+            for v in range(vertices_number):
+                x, y, weight, *neighbours = [int(w) for w in file.readline().split()]
+
+                l += 1
+
+                vertices.append((x, y))
+                self.add_vertice((x, y), weight)
+
+                for n in neighbours:
+                    self.add_edge((x, y), vertices[n])
+            break
+        return self
+
     def random_graph(self, size: int, seed: int):
         self.vertices.clear()
         self.edges.clear()
@@ -53,45 +88,39 @@ class SearchGraph:
         graph = nx.Graph()
 
         for vertices, neighbours in self.edges.items():
-            #print(vertices)
-            #print(neighbours)
             for neighbour in neighbours:
                 graph.add_edge(vertices, neighbour)
         
-        positions = {x: x for x in graph.nodes}
-        print(positions)
-
-        #low, *_, high = sorted(self.vertices.values())
-        #norm = plot.colors.Normalize(vmin=low, vmax=high, clip=True)
-        #mapper = plot.cm.ScalarMappable(norm=norm, cmap=plot.cm.coolwarm)
-        #colors = [mapper.to_rgba(i) for i in self.vertices.values()]
+        positions = {x: x for x in graph.nodes} # {node: value}
         
         nx.draw_networkx_edges(
             graph,
-            pos=positions,
-            nodelist=self.vertices,
-            edge_color='gray',
-            node_size=200,
-            width=2,
-            ax=ax
+            pos = positions,
+            nodelist = self.vertices,
+            edge_color = 'gray',
+            node_size = 200,
+            width = 2,
+            ax = ax
         )
 
         nx.draw_networkx_nodes(
             graph,
-            pos=positions,
+            pos = positions,
             #labels=sol_vertices,
-            nodelist=self.vertices,
-            node_size=200,
+            nodelist = self.vertices,
+            node_size = 400,
+            node_color = '#FFB266',
             #node_color=sol_colors,
             #cmap=plot.cm.summer,
-            ax=ax
+            ax = ax
         )
 
-        #nx.draw_networkx_labels(
-        #    graph,
-        #    pos=positions,
-        #    labels=self.vertices,
-        #    font_weight='bold',
-        #    font_color='black',
-        #    #with_labels=True
-        #)
+        nx.draw_networkx_labels(
+            graph,
+            pos = positions,
+            labels = self.vertices,
+            #font_weight = 'bold',
+            font_color = 'black',
+            font_size = 8
+            #with_labels=True
+        )
