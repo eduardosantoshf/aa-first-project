@@ -1,6 +1,8 @@
 from turtle import position
 from typing import Tuple
 import networkx as nx
+import random as rand
+from pprint import pprint
 from networkx.generators.random_graphs import erdos_renyi_graph
 
 Point = Tuple[int, int]
@@ -8,26 +10,25 @@ Point = Tuple[int, int]
 class SearchGraph:
 
     def __init__(self) -> None:
-        self.vertices = {}
+        self.nodes = {}
         self.edges = {}
 
     @property
     def size(self):
-        return len(self.vertices)
+        return len(self.nodes)
 
-    def add_vertice(self, vertice: Point, weight: int):
-        self.vertices[vertice] = weight
+    def add_node(self, node: Point, weight: int):
+        self.nodes[node] = weight
 
         return self
     
-    def add_edge(self, vertice1: Point, vertice2: Point):
-        self.edges.setdefault(vertice1, set()).add(vertice2)
-        self.edges.setdefault(vertice2, set()).add(vertice1)
+    def add_edge(self, node1: Point, node2: Point):
+        self.edges.setdefault(node1, set()).add(node2)
 
         return self
 
     def read_graph(self, filename: str):
-        self.vertices.clear()
+        self.nodes.clear()
         self.edges.clear()
 
         try:
@@ -43,90 +44,95 @@ class SearchGraph:
             #if not line:
             #    continue
 
-            #vertices_number = len(line.split(" "))
-            vertices_number = int(line)
-            print(vertices_number)
+            nodes_number = int(line)
+            print(nodes_number)
 
-            vertices = []
-            for v in range(vertices_number):
+            nodes = []
+            for v in range(nodes_number):
                 x, y, weight, *neighbours = [int(w) for w in file.readline().split()]
 
                 l += 1
 
-                vertices.append((x, y))
-                self.add_vertice((x, y), weight)
+                nodes.append((x, y))
+                self.add_node((x, y), weight)
 
                 for n in neighbours:
-                    self.add_edge((x, y), vertices[n])
+                    self.add_edge((x, y), nodes[n])
             break
 
-        print(f'Vertices: ', self.vertices)
+        print(f'nodes: ', self.nodes)
         print(f'Edges: ', self.edges)
 
         return self
 
-    def random_graph(self, size: int, seed: int):
-        self.vertices.clear()
+    def random_graph(self, size: int, seed: int, edge_probability: int = 0.25):
+        assert 2 <= size <= 81, "Size must be between [2, 81]"
+
+        self.nodes.clear()
         self.edges.clear()
+        rand.seed(seed)
 
-        g = erdos_renyi_graph(
-            n = size, 
-            p = 0.25,
-            seed = seed,
-            directed = True
-        )
+        for _ in range(1, size):
+            while True:
+                x, y = (rand.randint(1, 20), rand.randint(1, 20))
+                if not (x, y) in self.nodes: break
 
-        nx.draw_networkx(
-            g, 
-            pos = nx.spring_layout(g),
-            edge_color = 'gray',
-            width = 2,
-            node_size = 400,
-            node_color = '#FFB266',
-        )
+            self.add_node((x,y), rand.randint(1, 10))
+        
+        print(self.nodes)
 
-        print(g.nodes)
-        print(g.edges)
+        all_nodes_combinations = [(n1, n2) for n1 in self.nodes for n2 in self.nodes if n1 != n2]
 
+        #pprint(all_nodes_combinations)
+
+        for n1 in self.nodes:
+            for n2 in self.nodes:
+                if rand.random() < edge_probability and n1 != n2:
+                    self.add_edge(n1, n2)
+
+        print(self.edges)
+        
         return self
 
     def draw_graph(self, ax = None):
         graph = nx.Graph()
 
-        for vertices, neighbours in self.edges.items():
-            for neighbour in neighbours:
-                graph.add_edge(vertices, neighbour)
+        for key in self.edges.keys():
+            for value in self.edges[key]:
+                graph.add_edge(key, value)
+
+        pprint(graph.edges)
         
         positions = {x: x for x in graph.nodes} # {node: value}
         
-        nx.draw_networkx_edges(
+        nx.draw(
             graph,
             pos = positions,
-            nodelist = self.vertices,
+            nodelist = self.nodes,
             edge_color = 'gray',
-            node_size = 200,
-            width = 2,
-            ax = ax
-        )
-
-        nx.draw_networkx_nodes(
-            graph,
-            pos = positions,
-            #labels=sol_vertices,
-            nodelist = self.vertices,
             node_size = 400,
             node_color = '#FFB266',
-            #node_color=sol_colors,
-            #cmap=plot.cm.summer,
-            ax = ax
+            width = 2,
+            ax = ax,
+            arrows = True,
+            arrowsize = 10,
+            arrowstyle='->'
         )
+
+        #nx.draw_networkx_nodes(
+        #    graph,
+        #    pos = positions,
+        #    nodelist = self.nodes,
+        #    node_size = 400,
+        #    node_color = '#FFB266',
+        #    ax = ax
+        #)
 
         nx.draw_networkx_labels(
             graph,
             pos = positions,
-            labels = self.vertices,
-            #font_weight = 'bold',
+            labels = self.nodes,
             font_color = 'black',
             font_size = 8
-            #with_labels=True
         )
+
