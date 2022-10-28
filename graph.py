@@ -1,13 +1,11 @@
-from turtle import position
 from typing import Tuple
 import networkx as nx
 import random as rand
 from pprint import pprint
-from networkx.generators.random_graphs import erdos_renyi_graph
 
 Point = Tuple[int, int]
 
-class SearchGraph:
+class Graph:
 
     def __init__(self) -> None:
         self.nodes = {}
@@ -23,7 +21,7 @@ class SearchGraph:
         return self
     
     def add_edge(self, node1: Point, node2: Point):
-        self.edges.setdefault(node1, set()).add(node2)
+        self.edges.setdefault(node1, []).append(node2)
 
         return self
 
@@ -41,31 +39,43 @@ class SearchGraph:
         while file:
             line = file.readline()
             l += 1
-            #if not line:
-            #    continue
 
             nodes_number = int(line)
             print(nodes_number)
 
-            nodes = []
-            for v in range(nodes_number):
+            nodes = dict()
+            edges = dict()
+            for v in range(1, nodes_number + 1):
                 x, y, weight, *neighbours = [int(w) for w in file.readline().split()]
 
                 l += 1
 
-                nodes.append((x, y))
+                nodes[v] = (x, y)
                 self.add_node((x, y), weight)
 
                 for n in neighbours:
-                    self.add_edge((x, y), nodes[n])
-            break
+                    edges.setdefault(v, []).append(n)
 
+                #for n in neighbours:
+                #    self.add_edge((x, y), nodes[n])
+
+            break
+        
+        print("nodes: ", nodes)
+        print("edges: ", edges)
+
+        for e in edges.keys():
+            for n in edges[e]:
+                self.add_edge(nodes[e], nodes[n])
+
+        print("\n")
+        print("\n")
         print(f'nodes: ', self.nodes)
-        print(f'Edges: ', self.edges)
+        print(f'edges: ', self.edges)
 
         return self
 
-    def random_graph(self, size: int, seed: int, edge_probability: int = 0.25):
+    def random_graph(self, size: int, seed: int, edge_probability: int = 0.5):
         assert 2 <= size <= 81, "Size must be between [2, 81]"
 
         self.nodes.clear()
@@ -95,7 +105,7 @@ class SearchGraph:
         return self
 
     def draw_graph(self, ax = None):
-        graph = nx.Graph()
+        graph = nx.DiGraph()
 
         for key in self.edges.keys():
             for value in self.edges[key]:
@@ -118,15 +128,6 @@ class SearchGraph:
             arrowsize = 10,
             arrowstyle='->'
         )
-
-        #nx.draw_networkx_nodes(
-        #    graph,
-        #    pos = positions,
-        #    nodelist = self.nodes,
-        #    node_size = 400,
-        #    node_color = '#FFB266',
-        #    ax = ax
-        #)
 
         nx.draw_networkx_labels(
             graph,
