@@ -1,8 +1,7 @@
-import random as rand
 from turtle import position
 from typing import Tuple
 import networkx as nx
-import matplotlib as plot
+from networkx.generators.random_graphs import erdos_renyi_graph
 
 Point = Tuple[int, int]
 
@@ -60,28 +59,35 @@ class SearchGraph:
                 for n in neighbours:
                     self.add_edge((x, y), vertices[n])
             break
+
+        print(f'Vertices: ', self.vertices)
+        print(f'Edges: ', self.edges)
+
         return self
 
     def random_graph(self, size: int, seed: int):
         self.vertices.clear()
         self.edges.clear()
 
-        rand.seed(seed)
+        g = erdos_renyi_graph(
+            n = size, 
+            p = 0.25,
+            seed = seed,
+            directed = True
+        )
 
-        vertices = []
-        for vertice in range(size):
-            while True:
-                x, y = (rand.randint(1, 9), rand.randint(1, 9))
-                if not (x, y) in self.vertices: break
+        nx.draw_networkx(
+            g, 
+            pos = nx.spring_layout(g),
+            edge_color = 'gray',
+            width = 2,
+            node_size = 400,
+            node_color = '#FFB266',
+        )
 
-            vertices.append((x, y))
-            self.add_vertice((x, y), rand.randint(1, 99))
+        print(g.nodes)
+        print(g.edges)
 
-        for v1 in range(size - 1):
-            for _ in range(rand.randint(1, size // 2)):
-                v2 = rand.randint(v1 + 1, size - 1)
-                self.add_edge(vertices[v1], vertices[v2])
-        
         return self
 
     def draw_graph(self, ax = None):
