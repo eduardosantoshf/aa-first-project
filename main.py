@@ -29,6 +29,14 @@ if __name__ == '__main__':
         required = False,
         help = 'number of vertices of the graph (default: %(default)s)'
     )
+    parser.add_argument('-e',
+        '--edges', 
+        metavar = 'N', 
+        default = 0.25, 
+        type = float, 
+        required = False,
+        help = 'maximum number of edges (default: %(default)s)'
+    )
     parser.add_argument('-a', 
         '--algorithm', 
         metavar = 'NAME', 
@@ -43,10 +51,11 @@ if __name__ == '__main__':
 
     seed = args["random"]
     size = args["vertices"]
+    maximum_edges_number = args["edges"]
     algorithm = args["algorithm"]
 
     if seed:
-        g = Graph().random_graph(size, seed)
+        g = Graph().random_graph(size, seed, maximum_edges_number)
     else:
         g = Graph().read_graph(args["file"].name)
 

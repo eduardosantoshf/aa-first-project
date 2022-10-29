@@ -144,7 +144,6 @@ class ExhaustiveSearch:
         l = len(lst)
 
         powerset = []
-
         for i in range(1 << l):
             powerset.append([lst[j] for j in range(l) if (i & (1 << j))])
 
@@ -153,7 +152,27 @@ class ExhaustiveSearch:
     def calculate(self):
         powerset = compute_powerset([n for n in self.nodes.keys()])
         
-        pprint(powerset)
+        #pprint(powerset)
+        
+        closures = []
+        for possible_closure in powerset:
+            print("possible closure: ", possible_closure)
+
+            out_edges = []
+            for node in possible_closure:
+                print("node: ", node)
+                if node in self.edges.keys():
+                    out_edges.extend(x for x in self.edges[node]\
+                                    if x not in out_edges)
+                    
+            print("out edges: ", out_edges)
+            
+            print("")
+            if not out_edges:
+                closures.extend(x for x in possible_closure if x not in closures)
+        
+        print("closures: ", closures)
+            
 
 
 class GreedySearch:
