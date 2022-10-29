@@ -69,5 +69,8 @@ if __name__ == '__main__':
     #    labelbottom=True
     #)
     g.draw_graph()
-    g.find_minimum_weighted_closure(algorithm = algorithm)
+    
+    minimum_weighted_closure = g.find_minimum_weighted_closure(algorithm = algorithm)
+    print("Minimum Weighted Closure:", minimum_weighted_closure)
+
     plot.show()

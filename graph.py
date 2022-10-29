@@ -2,6 +2,7 @@ from typing import Tuple
 import networkx as nx
 import random as rand
 from pprint import pprint
+import ast
 
 Point = Tuple[int, int]
 
@@ -23,7 +24,7 @@ class Graph:
         return self
     
     def add_edge(self, node1: Point, node2: Point):
-        self.edges.setdefault(node1, []).append(node2)
+        self.edges.setdefault(node1, []).append(node2) # add edge node1 -> node2
 
         return self
 
@@ -42,20 +43,22 @@ class Graph:
             line = file.readline()
             l += 1
 
-            nodes_number = int(line)
-            print(nodes_number)
+            nodes_number = int(line) # number of nodes = number of lines to read
 
             nodes = dict()
             edges = dict()
             for v in range(1, nodes_number + 1):
-                x, y, weight, *neighbours = [int(w) for w in file.readline().split()]
+                x, y, weight, *neighbours = [int(w) for w in \
+                                            file.readline().split()]
 
                 l += 1
 
                 nodes[v] = (x, y)
-                self.add_node((x, y), weight)
+                self.add_node((x, y), weight) # {node: weight}
 
-                for n in neighbours: edges.setdefault(v, []).append(n)
+                for n in neighbours: # neighbour nodes are nodes 
+                                     # that share an edge
+                    edges.setdefault(v, []).append(n) 
 
             break
 
@@ -75,19 +78,21 @@ class Graph:
 
         for _ in range(size):
             while True:
-                x, y = (rand.randint(1, 20), rand.randint(1, 20))
-                if not (x, y) in self.nodes: break
+                x, y = (rand.randint(1, 20), rand.randint(1, 20)) # generate
+                                                                  # random
+                                                                  # coordinates
+                if not (x, y) in self.nodes: break # continue if point exists
 
             self.add_node((x,y), rand.randint(1, 10))
         
-        print(self.nodes)
+        print(f'nodes: ', self.nodes)
 
         for n1 in self.nodes:
             for n2 in self.nodes:
                 if rand.random() < edge_probability and n1 != n2:
-                    self.add_edge(n1, n2)
+                    self.add_edge(n1, n2) # generate edges until given max
 
-        print(self.edges)
+        print(f'edges: ', self.edges)
         
         return self
 
@@ -100,7 +105,7 @@ class Graph:
 
         pprint(graph.edges)
         
-        positions = {x: x for x in graph.nodes} # {node: value}
+        positions = {x: x for x in graph.nodes}
         
         nx.draw(
             graph,
@@ -129,6 +134,8 @@ class Graph:
             solution = ExhaustiveSearch(self.nodes, self.edges).calculate()
         if algorithm == "greedy":
             solution = GreedySearch(self.nodes, self.edges)
+
+        return solution
                 
 
 class ExhaustiveSearch:
@@ -150,9 +157,9 @@ class ExhaustiveSearch:
         return powerset
     
     def calculate(self):
+        # a power set of a set S is the set of all subsets of S, 
+        # including the empty set and S itself
         powerset = compute_powerset([n for n in self.nodes.keys()])
-        
-        #pprint(powerset)
         
         closures = []
         for possible_closure in powerset:
@@ -161,18 +168,27 @@ class ExhaustiveSearch:
             out_edges = []
             for node in possible_closure:
                 print("node: ", node)
-                if node in self.edges.keys():
+                if node in self.edges.keys(): # node has an edge for another node
                     out_edges.extend(x for x in self.edges[node]\
                                     if x not in out_edges)
                     
-            print("out edges: ", out_edges)
-            
+            print("edges to nodes external to the possible closure: ", out_edges)
             print("")
-            if not out_edges:
-                closures.extend(x for x in possible_closure if x not in closures)
+
+            if not out_edges and possible_closure: # if no edges leave the 
+                                # possible closure and its value != None,
+                                # then this subset is a closure
+                closures.append(possible_closure)
         
         print("closures: ", closures)
-            
+
+        closures_weights = dict()
+        for closure in closures:
+            closures_weights[str(closure)] = sum([self.nodes[node] \
+                                                for node in closure])
+
+        return ast.literal_eval(min(closures_weights, key = closures_weights.get))
+        
 
 
 class GreedySearch:
