@@ -1,7 +1,7 @@
 import argparse
 from hashlib import algorithms_available
 import matplotlib.pyplot as plot
-from graph import SearchGraph
+from graph import Graph
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
@@ -24,7 +24,7 @@ if __name__ == '__main__':
     parser.add_argument('-v',
         '--vertices', 
         metavar = 'N', 
-        default = 25, 
+        default = 15, 
         type = int, 
         required = False,
         help = 'number of vertices of the graph (default: %(default)s)'
@@ -35,35 +35,30 @@ if __name__ == '__main__':
         default = 'exhaustive', 
         type = str, 
         required = False,
-        choices = ['exhaustive', 'branch-and-bound','greedy', 'astar', 'astar-heap'],
+        choices = ['exhaustive', 'greedy'],
         help = 'number of vertices of the graph (default: %(default)s)'
     )
-    parser.add_argument('-hr',
-        '--heuristic', 
-        metavar = 'N', 
-        default = 1, 
-        type = int, 
-        required = False,
-        help = 'heuristic used by the Greedy and A-star approach: '
-            '(1) based on weights, (2) based on weights-degree,'
-            ' (default: %(default)s)')
 
     args = vars(parser.parse_args())
 
     seed = args["random"]
     size = args["vertices"]
     algorithm = args["algorithm"]
-    heuristic = args["heuristic"]
 
     if seed:
-        g = SearchGraph().random_graph(size, seed)
+        g = Graph().random_graph(size, seed)
     else:
-        g = SearchGraph().read_graph(args["file"].name)
+        g = Graph().read_graph(args["file"].name)
 
+    #plot.axis('on')
+    #plot.xlim(0, 21)
+    #plot.ylim(0, 21)
+    #plot.tick_params(
+    #    left=True, 
+    #    bottom=True,
+    #    labelleft=True, 
+    #    labelbottom=True
+    #)
     g.draw_graph()
-
-    plot.axis('on')
-    plot.xlim(0, 10)
-    plot.ylim(0, 10)
-    plot.tick_params(left=True, bottom=True,             labelleft=True, labelbottom=True)
+    g.find_minimum_weighted_closure(algorithm = algorithm)
     plot.show()

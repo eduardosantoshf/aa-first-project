@@ -5,11 +5,13 @@ from pprint import pprint
 
 Point = Tuple[int, int]
 
+
+
 class Graph:
 
-    def __init__(self) -> None:
-        self.nodes = {}
-        self.edges = {}
+    def __init__(self):
+        self.nodes = dict()
+        self.edges = dict()
 
     @property
     def size(self):
@@ -53,36 +55,25 @@ class Graph:
                 nodes[v] = (x, y)
                 self.add_node((x, y), weight)
 
-                for n in neighbours:
-                    edges.setdefault(v, []).append(n)
-
-                #for n in neighbours:
-                #    self.add_edge((x, y), nodes[n])
+                for n in neighbours: edges.setdefault(v, []).append(n)
 
             break
-        
-        print("nodes: ", nodes)
-        print("edges: ", edges)
 
         for e in edges.keys():
-            for n in edges[e]:
-                self.add_edge(nodes[e], nodes[n])
+            for n in edges[e]: self.add_edge(nodes[e], nodes[n])
 
-        print("\n")
-        print("\n")
         print(f'nodes: ', self.nodes)
         print(f'edges: ', self.edges)
 
         return self
 
     def random_graph(self, size: int, seed: int, edge_probability: int = 0.5):
-        assert 2 <= size <= 81, "Size must be between [2, 81]"
-
         self.nodes.clear()
         self.edges.clear()
+
         rand.seed(seed)
 
-        for _ in range(1, size):
+        for _ in range(size):
             while True:
                 x, y = (rand.randint(1, 20), rand.randint(1, 20))
                 if not (x, y) in self.nodes: break
@@ -90,10 +81,6 @@ class Graph:
             self.add_node((x,y), rand.randint(1, 10))
         
         print(self.nodes)
-
-        all_nodes_combinations = [(n1, n2) for n1 in self.nodes for n2 in self.nodes if n1 != n2]
-
-        #pprint(all_nodes_combinations)
 
         for n1 in self.nodes:
             for n2 in self.nodes:
@@ -137,3 +124,37 @@ class Graph:
             font_size = 8
         )
 
+    def find_minimum_weighted_closure(self, algorithm: str = "exhaustive"):
+        if algorithm == "exhaustive":
+            solution = ExhaustiveSearch(self.nodes, self.edges).calculate()
+        if algorithm == "greedy":
+            solution = GreedySearch(self.nodes, self.edges)
+                
+
+class ExhaustiveSearch:
+
+    global compute_powerset
+
+    def __init__(self, nodes: dict(), edges: dict()):
+        self.nodes = nodes
+        self.edges = edges
+        self.size = len(nodes)
+
+    def compute_powerset(lst):
+        l = len(lst)
+
+        powerset = []
+
+        for i in range(1 << l):
+            powerset.append([lst[j] for j in range(l) if (i & (1 << j))])
+
+        return powerset
+    
+    def calculate(self):
+        powerset = compute_powerset([n for n in self.nodes.keys()])
+        
+        pprint(powerset)
+
+
+class GreedySearch:
+    pass
