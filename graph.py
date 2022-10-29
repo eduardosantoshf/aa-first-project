@@ -168,9 +168,11 @@ class ExhaustiveSearch:
             out_edges = []
             for node in possible_closure:
                 print("node: ", node)
-                if node in self.edges.keys(): # node has an edge for another node
+                if node in self.edges.keys():
+                    # node has no edge to a node outside the subset
                     out_edges.extend(x for x in self.edges[node]\
-                                    if x not in out_edges)
+                                    if x not in out_edges\
+                                    and x not in possible_closure)
                     
             print("edges to nodes external to the possible closure: ", out_edges)
             print("")
