@@ -133,7 +133,7 @@ class Graph:
         if algorithm == "exhaustive":
             solution = ExhaustiveSearch(self.nodes, self.edges).calculate()
         if algorithm == "greedy":
-            solution = GreedySearch(self.nodes, self.edges)
+            solution = GreedySearch(self.nodes, self.edges).calculate()
 
         return solution
                 
@@ -192,6 +192,47 @@ class ExhaustiveSearch:
         return ast.literal_eval(min(closures_weights, key = closures_weights.get))
         
 
-
 class GreedySearch:
-    pass
+    
+    def __init__(self, nodes: dict(), edges: dict()):
+        self.nodes = nodes
+        self.edges = edges
+        self.size = len(nodes)
+    
+    def calculate(self):
+        # ordering nodes by their weight (smallest -> largest)
+        self.nodes = {k: v for k, v in sorted(
+            self.nodes.items(), 
+            key = lambda item: item[1]
+        )}
+
+        closures = []
+        possible_closure = []
+        for node in self.nodes:
+            possible_closure.append(node)
+            
+            out_edges = []
+            for node in possible_closure:
+                print("node: ", node)
+                if node in self.edges.keys():
+                    # node has no edge to a node outside the subset
+                    out_edges.extend(x for x in self.edges[node]\
+                                    if x not in out_edges\
+                                    and x not in possible_closure)
+            
+                if not out_edges and possible_closure: # if no edges leave the 
+                                    # possible closure and its value != None,
+                                    # then this subset is a closure
+                    closures.append(possible_closure)
+                    break
+            
+            if closures: break # break if we already found a closure (greedy)
+        
+        print("closures: ", closures)
+
+        closures_weights = dict()
+        for closure in closures:
+            closures_weights[str(closure)] = sum([self.nodes[node] \
+                                                for node in closure])
+
+        return ast.literal_eval(min(closures_weights, key = closures_weights.get))

@@ -1,5 +1,4 @@
 import argparse
-from hashlib import algorithms_available
 import matplotlib.pyplot as plot
 from graph import Graph
 
@@ -59,15 +58,6 @@ if __name__ == '__main__':
     else:
         g = Graph().read_graph(args["file"].name)
 
-    #plot.axis('on')
-    #plot.xlim(0, 21)
-    #plot.ylim(0, 21)
-    #plot.tick_params(
-    #    left=True, 
-    #    bottom=True,
-    #    labelleft=True, 
-    #    labelbottom=True
-    #)
     g.draw_graph()
     
     minimum_weighted_closure = g.find_minimum_weighted_closure(algorithm = algorithm)
