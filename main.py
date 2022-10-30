@@ -20,7 +20,8 @@ if __name__ == '__main__':
         type = int,
         help = 'Create a random graph given a seed'
     )
-    parser.add_argument('-v',
+    parser.add_argument(
+        '-v',
         '--vertices', 
         metavar = 'N', 
         default = 15, 
@@ -28,7 +29,8 @@ if __name__ == '__main__':
         required = False,
         help = 'number of vertices of the graph (default: %(default)s)'
     )
-    parser.add_argument('-e',
+    parser.add_argument(
+        '-e',
         '--edges', 
         metavar = 'N', 
         default = 0.25, 
@@ -36,7 +38,8 @@ if __name__ == '__main__':
         required = False,
         help = 'maximum number of edges (default: %(default)s)'
     )
-    parser.add_argument('-a', 
+    parser.add_argument(
+        '-a', 
         '--algorithm', 
         metavar = 'NAME', 
         default = 'exhaustive', 
@@ -44,6 +47,13 @@ if __name__ == '__main__':
         required = False,
         choices = ['exhaustive', 'greedy'],
         help = 'number of vertices of the graph (default: %(default)s)'
+    )
+    parser.add_argument(
+        '-d', 
+        '--draw', 
+        action = 'store_true',
+        required = False,
+        help = 'draw graph'
     )
 
     args = vars(parser.parse_args())
@@ -58,7 +68,7 @@ if __name__ == '__main__':
     else:
         g = Graph().read_graph(args["file"].name)
 
-    g.draw_graph()
+    if args["draw"]: g.draw_graph()
     
     minimum_weighted_closure = g.find_minimum_weighted_closure(algorithm = algorithm)
     print("Minimum Weighted Closure:", minimum_weighted_closure)

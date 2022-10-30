@@ -6,8 +6,6 @@ import ast
 
 Point = Tuple[int, int]
 
-
-
 class Graph:
 
     def __init__(self):
@@ -96,11 +94,32 @@ class Graph:
         
         return self
 
+    def find_minimum_weighted_closure(self, algorithm: str = "exhaustive"):
+        if algorithm == "exhaustive":
+            solution = ExhaustiveSearch(self.nodes, self.edges).calculate()
+        if algorithm == "greedy":
+            solution = GreedySearch(self.nodes, self.edges).calculate()
+
+        return solution
+    
     def draw_graph(self, ax = None):
+        graph_drawer = GraphDrawer()
+        graph_drawer.draw_graph(self.nodes, self.edges)
+
+class GraphDrawer:
+
+    def draw_graph(
+        self, 
+        nodes: dict(), 
+        edges: dict(), 
+        solution: dict() = None, 
+        ax = None
+    ):
+
         graph = nx.DiGraph()
 
-        for key in self.edges.keys():
-            for value in self.edges[key]:
+        for key in edges.keys():
+            for value in edges[key]:
                 graph.add_edge(key, value)
 
         pprint(graph.edges)
@@ -110,7 +129,7 @@ class Graph:
         nx.draw(
             graph,
             pos = positions,
-            nodelist = self.nodes,
+            nodelist = nodes,
             edge_color = 'gray',
             node_size = 400,
             node_color = '#FFB266',
@@ -124,19 +143,12 @@ class Graph:
         nx.draw_networkx_labels(
             graph,
             pos = positions,
-            labels = self.nodes,
+            labels = nodes,
             font_color = 'black',
             font_size = 8
         )
 
-    def find_minimum_weighted_closure(self, algorithm: str = "exhaustive"):
-        if algorithm == "exhaustive":
-            solution = ExhaustiveSearch(self.nodes, self.edges).calculate()
-        if algorithm == "greedy":
-            solution = GreedySearch(self.nodes, self.edges).calculate()
 
-        return solution
-                
 
 class ExhaustiveSearch:
 
