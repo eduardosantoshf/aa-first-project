@@ -1,3 +1,4 @@
+from turtle import pos
 from typing import Tuple
 import networkx as nx
 import random as rand
@@ -11,6 +12,7 @@ class Graph:
     def __init__(self):
         self.nodes = dict()
         self.edges = dict()
+        self.solution = dict()
 
     @property
     def size(self):
@@ -96,15 +98,15 @@ class Graph:
 
     def find_minimum_weighted_closure(self, algorithm: str = "exhaustive"):
         if algorithm == "exhaustive":
-            solution = ExhaustiveSearch(self.nodes, self.edges).calculate()
+            self.solution = ExhaustiveSearch(self.nodes, self.edges).calculate()
         if algorithm == "greedy":
-            solution = GreedySearch(self.nodes, self.edges).calculate()
+            self.solution = GreedySearch(self.nodes, self.edges).calculate()
 
-        return solution
+        return self.solution
     
     def draw_graph(self, ax = None):
         graph_drawer = GraphDrawer()
-        graph_drawer.draw_graph(self.nodes, self.edges)
+        graph_drawer.draw_graph(self.nodes, self.edges, self.solution)
 
 class GraphDrawer:
 
@@ -121,24 +123,30 @@ class GraphDrawer:
         for key in edges.keys():
             for value in edges[key]:
                 graph.add_edge(key, value)
-
-        pprint(graph.edges)
         
         positions = {x: x for x in graph.nodes}
-        
+
         nx.draw(
             graph,
             pos = positions,
             nodelist = nodes,
-            edge_color = 'gray',
-            node_size = 400,
-            node_color = '#FFB266',
-            width = 2,
+            edge_color = '#000000',
+            node_size = 500,
+            node_color = '#9999FF',
+            width = 1,
             ax = ax,
             arrows = True,
             arrowsize = 10,
             arrowstyle='->'
         )
+
+        nx.draw_networkx_nodes(
+            graph,
+            pos = positions,
+            nodelist = solution,
+            node_size = 400,
+            node_color = '#99FF99',
+            ax = ax)
 
         nx.draw_networkx_labels(
             graph,
@@ -147,7 +155,6 @@ class GraphDrawer:
             font_color = 'black',
             font_size = 8
         )
-
 
 
 class ExhaustiveSearch:

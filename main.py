@@ -67,10 +67,10 @@ if __name__ == '__main__':
         g = Graph().random_graph(size, seed, maximum_edges_number)
     else:
         g = Graph().read_graph(args["file"].name)
-
-    if args["draw"]: g.draw_graph()
     
     minimum_weighted_closure = g.find_minimum_weighted_closure(algorithm = algorithm)
-    print("Minimum Weighted Closure:", minimum_weighted_closure)
+    print("\nMinimum Weighted Closure:", minimum_weighted_closure)
+
+    if args["draw"]: g.draw_graph()
 
     plot.show()
