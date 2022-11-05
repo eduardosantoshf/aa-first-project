@@ -18,16 +18,16 @@ if __name__ == '__main__':
         '--random',
         metavar = 'SEED',
         type = int,
-        help = 'Create a random graph given a seed'
+        help = 'create a random graph given a seed'
     )
     parser.add_argument(
-        '-v',
-        '--vertices', 
+        '-n',
+        '--nodes', 
         metavar = 'N', 
         default = 15, 
         type = int, 
         required = False,
-        help = 'number of vertices of the graph (default: %(default)s)'
+        help = 'number of nodes of the graph (default: %(default)s)'
     )
     parser.add_argument(
         '-e',
@@ -46,7 +46,7 @@ if __name__ == '__main__':
         type = str, 
         required = False,
         choices = ['exhaustive', 'greedy'],
-        help = 'number of vertices of the graph (default: %(default)s)'
+        help = 'algorithm used to solve the problem (default: exhaustive)'
     )
     parser.add_argument(
         '-d', 
@@ -59,7 +59,7 @@ if __name__ == '__main__':
     args = vars(parser.parse_args())
 
     seed = args["random"]
-    size = args["vertices"]
+    size = args["nodes"]
     maximum_edges_number = args["edges"]
     algorithm = args["algorithm"]
 
@@ -68,8 +68,12 @@ if __name__ == '__main__':
     else:
         g = Graph().read_graph(args["file"].name)
     
-    minimum_weighted_closure = g.find_minimum_weighted_closure(algorithm = algorithm)
+    minimum_weighted_closure, iterations, execution_time, solutions_number = \
+        g.find_minimum_weighted_closure(algorithm = algorithm)
     print("\nMinimum Weighted Closure:", minimum_weighted_closure)
+    print("Iterations: ", iterations)
+    print("Execution time: ", execution_time)
+    print("Number of solutions found: ", solutions_number)
 
     if args["draw"]: g.draw_graph()
 

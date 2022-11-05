@@ -4,6 +4,7 @@ import networkx as nx
 import random as rand
 from pprint import pprint
 import ast
+import time
 
 Point = Tuple[int, int]
 
@@ -65,8 +66,8 @@ class Graph:
         for e in edges.keys():
             for n in edges[e]: self.add_edge(nodes[e], nodes[n])
 
-        print(f'nodes: ', self.nodes)
-        print(f'edges: ', self.edges)
+        #print(f'nodes: ', self.nodes)
+        #print(f'edges: ', self.edges)
 
         return self
 
@@ -85,24 +86,24 @@ class Graph:
 
             self.add_node((x,y), rand.randint(1, 10))
         
-        print(f'nodes: ', self.nodes)
+        #print(f'nodes: ', self.nodes)
 
         for n1 in self.nodes:
             for n2 in self.nodes:
                 if rand.random() < edge_probability and n1 != n2:
                     self.add_edge(n1, n2) # generate edges until given max
 
-        print(f'edges: ', self.edges)
+        #print(f'edges: ', self.edges)
         
         return self
 
     def find_minimum_weighted_closure(self, algorithm: str = "exhaustive"):
         if algorithm == "exhaustive":
-            self.solution = ExhaustiveSearch(self.nodes, self.edges).calculate()
+            self.solution, iterations, execution_time, solutions_number = ExhaustiveSearch(self.nodes, self.edges).calculate()
         if algorithm == "greedy":
-            self.solution = GreedySearch(self.nodes, self.edges).calculate()
+            self.solution, iterations, execution_time, solutions_number = GreedySearch(self.nodes, self.edges).calculate()
 
-        return self.solution
+        return self.solution, iterations, execution_time, solutions_number
     
     def draw_graph(self, ax = None):
         graph_drawer = GraphDrawer()
@@ -124,7 +125,7 @@ class GraphDrawer:
             for value in edges[key]:
                 graph.add_edge(key, value)
         
-        positions = {x: x for x in graph.nodes}
+        positions = {x: x for x in nodes}
 
         nx.draw(
             graph,
@@ -144,7 +145,7 @@ class GraphDrawer:
             graph,
             pos = positions,
             nodelist = solution,
-            node_size = 400,
+            node_size = 500,
             node_color = '#99FF99',
             ax = ax)
 
@@ -176,39 +177,54 @@ class ExhaustiveSearch:
         return powerset
     
     def calculate(self):
+
+        start = time.time()
+
         # a power set of a set S is the set of all subsets of S, 
         # including the empty set and S itself
         powerset = compute_powerset([n for n in self.nodes.keys()])
         
+        iterations = 0
+
         closures = []
         for possible_closure in powerset:
-            print("possible closure: ", possible_closure)
+            #print("possible closure: ", possible_closure)
 
             out_edges = []
             for node in possible_closure:
-                print("node: ", node)
+                #print("node: ", node)
                 if node in self.edges.keys():
                     # node has no edge to a node outside the subset
-                    out_edges.extend(x for x in self.edges[node]\
-                                    if x not in out_edges\
-                                    and x not in possible_closure)
+                    #out_edges.extend(x for x in self.edges[node]\
+                    #                if x not in out_edges\
+                    #                and x not in possible_closure)
+
+                    for x in self.edges[node]:
+                         if x not in out_edges and x not in possible_closure:
+                            iterations += 1
+
+                            out_edges.extend([x])
                     
-            print("edges to nodes external to the possible closure: ", out_edges)
-            print("")
+                    #print("out edges: ", out_edges)
+                    
+            #print("edges to nodes external to the possible closure: ", out_edges)
+            #print("")
 
             if not out_edges and possible_closure: # if no edges leave the 
                                 # possible closure and its value != None,
                                 # then this subset is a closure
                 closures.append(possible_closure)
         
-        print("closures: ", closures)
+        #print("closures: ", closures)
 
         closures_weights = dict()
         for closure in closures:
             closures_weights[str(closure)] = sum([self.nodes[node] \
                                                 for node in closure])
+        
+        end = time.time()
 
-        return ast.literal_eval(min(closures_weights, key = closures_weights.get))
+        return ast.literal_eval(min(closures_weights, key = closures_weights.get)), iterations, end - start, len(closures)
         
 
 class GreedySearch:
@@ -219,11 +235,16 @@ class GreedySearch:
         self.size = len(nodes)
     
     def calculate(self):
+
+        start = time.time()
+
         # ordering nodes by their weight (smallest -> largest)
         self.nodes = {k: v for k, v in sorted(
             self.nodes.items(), 
             key = lambda item: item[1]
         )}
+
+        iterations = 0
 
         closures = []
         possible_closure = []
@@ -232,12 +253,19 @@ class GreedySearch:
             
             out_edges = []
             for node in possible_closure:
-                print("node: ", node)
+                #print("node: ", node)
                 if node in self.edges.keys():
                     # node has no edge to a node outside the subset
-                    out_edges.extend(x for x in self.edges[node]\
-                                    if x not in out_edges\
-                                    and x not in possible_closure)
+                    #out_edges.extend(x for x in self.edges[node]\
+                    #                if x not in out_edges\
+                    #                and x not in possible_closure)
+
+                    for x in self.edges[node]:
+                         if x not in out_edges and x not in possible_closure:
+                            iterations += 1
+
+                            out_edges.extend([x])
+
             
                 if not out_edges and possible_closure: # if no edges leave the 
                                     # possible closure and its value != None,
@@ -247,11 +275,13 @@ class GreedySearch:
             
             if closures: break # break if we already found a closure (greedy)
         
-        print("closures: ", closures)
+        #print("closures: ", closures)
 
         closures_weights = dict()
         for closure in closures:
             closures_weights[str(closure)] = sum([self.nodes[node] \
                                                 for node in closure])
 
-        return ast.literal_eval(min(closures_weights, key = closures_weights.get))
+        end = time.time()
+
+        return ast.literal_eval(min(closures_weights, key = closures_weights.get)), iterations, end - start, len(closures)
